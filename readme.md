@@ -27,8 +27,6 @@ on:
 jobs:
   build:
     uses: poomsae-tech/general-pipelines/.github/workflows/docker/build-push.yml@v1
-    secrets:
-      vault-token: ${{ secrets.VAULT_TOKEN }}
 ```
 
 #### Требования
@@ -40,10 +38,7 @@ jobs:
    vue/Dockerfile
    ```
 
-2. **Секреты в репозитории:**
-   - `VAULT_TOKEN` — токен для доступа к Vault (https://vault.chaylab.ru)
-
-3. **Формат тегов:**
+2. **Формат тегов:**
    - `v1.0.0-kotlin` → собирает `./kotlin/Dockerfile`, пушит в `ghcr.io/poomsae-tech/kotlin:v1.0.0`
    - `v1.0.0-react` → собирает `./react/Dockerfile`, пушит в `ghcr.io/poomsae-tech/react:v1.0.0`
    - `v1.0.0-vue` → собирает `./vue/Dockerfile`, пушит в `ghcr.io/poomsae-tech/vue:v1.0.0`

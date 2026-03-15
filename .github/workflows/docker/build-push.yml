@@ -2,9 +2,6 @@ name: Build and Push Docker Image
 
 on:
   workflow_call:
-    secrets:
-      vault-token:
-        required: true
 
 jobs:
   build:
@@ -22,14 +19,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Get GHCR token from Vault
-        uses: hashicorp/vault-action@v3
-        with:
-          url: https://vault.chaylab.ru
-          token: ${{ secrets.vault-token }}
-          secrets: |
-            secret/data/github token | GHCR_TOKEN
-
       - name: Build and push
         uses: google/kaniko@v1
         with:
@@ -39,4 +28,4 @@ jobs:
           tags: ${{ steps.parse.outputs.version }}
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ env.GHCR_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
