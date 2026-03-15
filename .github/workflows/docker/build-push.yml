@@ -1,0 +1,42 @@
+name: Build and Push Docker Image
+
+on:
+  workflow_call:
+    secrets:
+      vault-token:
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Parse image name and version from tag
+        id: parse
+        run: |
+          REF=${{ github.ref_name }}
+          IMAGE=$(echo "$REF" | sed 's/^v.*-\(.*\)$/\1/')
+          VERSION=$(echo "$REF" | sed 's/^\(v[0-9.]*\).*$/\1/')
+          echo "image=$IMAGE" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get GHCR token from Vault
+        uses: hashicorp/vault-action@v3
+        with:
+          url: https://vault.chaylab.ru
+          token: ${{ secrets.vault-token }}
+          secrets: |
+            secret/data/github token | GHCR_TOKEN
+
+      - name: Build and push
+        uses: google/kaniko@v1
+        with:
+          context: ./${{ steps.parse.outputs.image }}
+          dockerfile: ./${{ steps.parse.outputs.image }}/Dockerfile
+          image: ghcr.io/poomsae-tech/${{ steps.parse.outputs.image }}
+          tags: ${{ steps.parse.outputs.version }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ env.GHCR_TOKEN }}
